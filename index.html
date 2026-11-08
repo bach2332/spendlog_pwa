@@ -90,7 +90,7 @@ table.rt tfoot td{font-weight:700;font-size:16px;border-top:2px solid var(--text
 .kp{font-size:13px;color:var(--mut);margin-top:5px;min-height:18px}
 .kp b{color:var(--text);font-size:15px}
 .ft{text-align:center;color:var(--mut);font-size:12px;margin:18px 0 6px}
-.qrow{display:flex;gap:8px;align-items:flex-start}
+.qrow{display:flex;gap:8px;align-items:stretch}
 .qrow>input{flex:1;min-width:0}
 .acell{flex:0 0 150px}
 .qrow .kw input{padding-left:8px;padding-right:58px}
@@ -104,6 +104,51 @@ table.rt tfoot td{font-weight:700;font-size:16px;border-top:2px solid var(--text
 .arow button{flex:1}
 .dchip{position:relative;display:flex;align-items:center;justify-content:center;margin:0;flex:0 0 auto;min-width:104px;padding:0 14px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);font-size:15px;font-weight:600;overflow:hidden}
 .dchip input{position:absolute;inset:0;width:100%;height:100%;min-height:0;opacity:0;padding:0;border:0;cursor:pointer}
+/* nhập tiền nổi bật */
+.abig{flex:0 0 148px}
+.abig .kw input{font-size:18px;font-weight:700;min-height:46px;padding-left:8px;padding-right:52px;border:2px solid var(--pri);border-radius:10px}
+.abig .kw .suf{font-size:12px;font-weight:600;right:8px}
+/* popup chi tiết danh mục */
+#sc{position:fixed;inset:0;background:#0008;display:none;align-items:flex-end;justify-content:center;z-index:10}
+#sc.on{display:flex}
+#sc .sheet{background:var(--card);width:100%;max-width:560px;border-radius:18px 18px 0 0;padding:16px;padding-bottom:calc(16px + env(safe-area-inset-bottom));max-height:88vh;overflow:auto}
+.srow{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.srow:last-child{border-bottom:0}
+.cr:hover .t span:first-child{text-decoration:underline}
+/* hướng dẫn sử dụng */
+.menu{display:flex;justify-content:space-between;align-items:center;padding:14px;margin-bottom:12px;background:var(--card);border:1px solid var(--line);border-radius:14px;color:var(--text);text-decoration:none;font-weight:600}
+.guide .gh{font-size:18px;margin:24px 0 4px;padding-top:12px;border-top:2px solid var(--line)}
+.guide h3{font-size:17px;margin:0 0 8px}
+.guide h4{font-size:15px;margin:16px 0 6px}
+.guide section{scroll-margin-top:12px;margin-bottom:8px}
+#hp{position:fixed;inset:0;background:#0008;display:none;align-items:flex-end;justify-content:center;z-index:10}
+#hp.on{display:flex}
+#hp .sheet{background:var(--card);width:100%;max-width:560px;border-radius:18px 18px 0 0;display:flex;flex-direction:column;max-height:90vh;overflow:hidden}
+#hp .hh{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:14px 16px;border-bottom:1px solid var(--line)}
+#hp .hb{overflow:auto;padding:12px 16px calc(20px + env(safe-area-inset-bottom));-webkit-overflow-scrolling:touch}
+#help-body section:last-of-type{min-height:85vh}
+.guide ol,.guide ul{padding-left:22px;margin:6px 0}
+.guide li{margin:6px 0}
+.guide p{margin:8px 0}
+.guide code{background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:1px 5px;font-size:13px;overflow-wrap:anywhere}
+.guide .warn{background:#fef3c7;color:#78350f;border-radius:10px;padding:10px 12px;margin:10px 0;font-size:14px}
+@media(prefers-color-scheme:dark){.guide .warn{background:#422006;color:#fde68a}}
+.toc{margin:0;padding:0;list-style:none}
+.toc li{margin:0}
+.toc a{display:block;padding:9px 0;border-bottom:1px solid var(--line);text-decoration:none}
+.toc .sub a{padding-left:16px}
+.toc .gl{font-weight:600;color:var(--mut);font-size:13px;padding:10px 0 2px}
+.flow{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:10px 0}
+.flow div{flex:1 1 90px;text-align:center;padding:10px 6px;border:1px solid var(--line);border-radius:10px;background:var(--bg);font-size:14px}
+.flow span{color:var(--mut)}
+.mock{border:1px dashed var(--line);border-radius:12px;padding:10px;margin:10px 0;background:var(--bg)}
+.mock .mt{font-weight:600;font-size:13px;margin-bottom:4px}
+.mock .mf{margin:6px 0}
+.mock .mf small{color:var(--mut);display:block}
+.mock .mf div{border:1px solid var(--line);border-radius:8px;padding:8px;background:var(--card);word-break:break-all}
+.mock .mf.hl div{border-color:var(--pri);box-shadow:0 0 0 2px var(--pri2)}
+.mock .mb{display:inline-block;background:var(--pri);color:#fff;border-radius:8px;padding:6px 12px;font-weight:600;font-size:14px;margin-top:4px}
+@media(prefers-color-scheme:dark){.mock .mb{color:#042f2e}}
 .catrow{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}
 </style>
 </head>
@@ -115,8 +160,8 @@ table.rt tfoot td{font-weight:700;font-size:16px;border-top:2px solid var(--text
   <section class="page on" id="p-add">
     <div class="card">
       <div class="qrow">
-        <input type="text" id="a-note" list="a-sug" placeholder="Nội dung (VD: cà phê)" autocomplete="off" enterkeyhint="next">
-        <div class="acell"><input type="text" id="a-amt" inputmode="numeric" placeholder="35" autocomplete="off" enterkeyhint="done"></div>
+        <div class="abig"><input type="text" id="a-amt" inputmode="numeric" pattern="[0-9]*" placeholder="35" autocomplete="off" enterkeyhint="next" aria-label="Số tiền (nghìn đồng)"></div>
+        <input type="text" id="a-note" list="a-sug" placeholder="Nội dung" autocomplete="off" enterkeyhint="done" aria-label="Nội dung">
       </div>
       <datalist id="a-sug"></datalist>
       <div id="a-kp"></div>
@@ -201,17 +246,21 @@ table.rt tfoot td{font-weight:700;font-size:16px;border-top:2px solid var(--text
   <!-- CÀI ĐẶT -->
   <section class="page" id="p-set">
     <div class="card">
-      <h2>Kết nối GitHub Gist</h2>
+      <h2>Kết nối GitHub (GitHub Connection)</h2>
       <div class="mut">Tạo token (chỉ cần quyền <b>gist</b>) tại <a href="https://github.com/settings/tokens/new?scopes=gist&description=chi-tieu" target="_blank" rel="noopener">github.com/settings/tokens</a>.</div>
-      <label>GitHub token</label>
+      <label>User ID (Git ID)</label>
+      <input type="text" id="s-uid" placeholder="Tên đăng nhập GitHub" autocomplete="off" autocapitalize="off" spellcheck="false">
+      <label>Mật khẩu (GitHub Token)</label>
       <input type="password" id="s-token" placeholder="ghp_... hoặc github_pat_..." autocomplete="off">
       <label>Gist ID (để trống để tạo Gist mới)</label>
       <input type="text" id="s-gist" placeholder="VD: a1b2c3d4e5..." autocomplete="off">
+      <div id="s-gistlink" class="mut" style="margin-top:6px"></div>
       <div class="row" style="margin-top:12px">
         <button id="s-connect">Kết nối &amp; tải</button>
         <button class="sec" id="s-logout">Đăng xuất</button>
       </div>
-      <div class="mut" style="margin-top:8px">Token và Gist ID chỉ lưu trong trình duyệt của thiết bị này. Dữ liệu chi tiêu lưu trong file <code>expenses.json</code> của Gist (secret).</div>
+      <div class="mut" style="margin-top:8px">User ID, token và Gist ID chỉ lưu trong trình duyệt của thiết bị này. Dữ liệu chi tiêu lưu trong file <code>expenses.json</code> của Gist (secret).</div>
+      <div class="mut" style="margin-top:8px"><a href="#help/github-connection" data-hs="github-connection">Hướng dẫn kết nối GitHub (How to connect GitHub?)</a></div>
     </div>
     <div class="card">
       <h2>Ngân sách tháng</h2>
@@ -230,6 +279,7 @@ table.rt tfoot td{font-weight:700;font-size:16px;border-top:2px solid var(--text
       <div class="mut" style="margin-top:6px">Chưa có Chat ID? Bấm <a id="z-link" href="#" target="_blank" rel="noopener">mở getUpdates</a> (trang chờ khoảng 30 giây), trong lúc chờ hãy nhắn 1 tin cho bot trên Zalo, rồi tìm <code>chat</code> → <code>id</code>.</div>
       <div class="row" style="margin-top:12px"><button id="z-save">Lưu</button><button class="sec" id="z-test">Gửi thử</button><button class="sec" id="z-off">Tắt</button></div>
       <div id="z-state" class="mut" style="margin-top:8px"></div>
+      <div class="mut" style="margin-top:8px"><a href="#help/zalo-connection" data-hs="zalo-connection">Hướng dẫn kết nối Zalo (How to connect Zalo?)</a></div>
     </div>
     <div class="card">
       <h2>Danh mục</h2>
@@ -251,6 +301,7 @@ table.rt tfoot td{font-weight:700;font-size:16px;border-top:2px solid var(--text
       <div id="imp-sum" style="margin-top:10px;font-size:14px"></div>
       <div style="margin-top:10px"><button id="imp-go" style="width:100%;display:none"></button></div>
     </div>
+    <a class="menu" id="s-guide" href="#help" data-hs=""><span>Hướng dẫn sử dụng (User Guide)</span><span class="mut">›</span></a>
   </section>
   <footer class="ft">Spendlog · v20261108</footer>
 </main>
@@ -286,13 +337,31 @@ table.rt tfoot td{font-weight:700;font-size:16px;border-top:2px solid var(--text
   </table>
   <div class="row" style="margin-top:12px"><button class="sec" id="rv-copy">Sao chép (Excel)</button><button id="rv-close">Đóng</button></div>
 </div></div>
+<div id="hp"><div class="sheet guide">
+  <div class="hh"><h2 style="margin:0">Hướng dẫn sử dụng (User Guide)</h2><button class="sec sm" id="hp-x" aria-label="Đóng">✕</button></div>
+  <div class="hb" id="hp-body">
+    <h3 style="margin:0 0 4px">Mục lục</h3>
+    <ul class="toc" id="help-toc"></ul>
+    <div id="help-body"></div>
+  </div>
+</div></div>
+<div id="sc"><div class="sheet">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+    <h2 id="sc-title" style="margin:0;word-break:break-word"></h2>
+    <button class="sec sm" id="sc-x" aria-label="Đóng">✕</button>
+  </div>
+  <div class="mut" id="sc-sub"></div>
+  <div class="mut" style="margin-top:8px">Tổng số tiền</div>
+  <div class="big" id="sc-total"></div>
+  <div id="sc-list" style="margin-top:6px"></div>
+</div></div>
 <div id="cf"><div class="sheet"><div id="cf-msg"></div><div class="row"><button class="sec" id="cf-no">Hủy</button><button class="bad" id="cf-yes">Xác nhận</button></div></div></div>
 <div id="toast"></div>
 
 <script>
 (()=>{
 const FILE='expenses.json';
-const K={token:'ct_token',gist:'ct_gist',cache:'ct_cache',dirty:'ct_dirty'};
+const K={token:'ct_token',gist:'ct_gist',cache:'ct_cache',dirty:'ct_dirty',uid:'ct_uid'};
 const DEF_CATS=['Ăn uống','Đi lại','Nhà cửa','Mua sắm','Con cái','Giải trí','Sức khỏe','Khác'];
 const PAL=['#0f766e','#2563eb','#d97706','#9333ea','#dc2626','#0891b2','#65a30d','#db2777','#64748b'];
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
@@ -338,8 +407,8 @@ async function load(){
       localStorage.setItem(K.cache,JSON.stringify(data));
       localStorage.removeItem(K.dirty);
     }
-    status('Đã đồng bộ');renderAll();
-  }catch(e){status('Lỗi tải: '+e.message)}
+    status('Đã đồng bộ');renderAll();return true;
+  }catch(e){status('Lỗi tải: '+e.message);return false}
 }
 async function save(){
   localStorage.setItem(K.cache,JSON.stringify(data));
@@ -351,7 +420,7 @@ async function save(){
     const content=JSON.stringify(data,null,1);
     if(!gid()){
       const g=await gh('/gists',{method:'POST',body:JSON.stringify({description:'Chi tiêu hàng ngày',public:false,files:{[FILE]:{content}}})});
-      localStorage.setItem(K.gist,g.id);$('#s-gist').value=g.id;
+      localStorage.setItem(K.gist,g.id);$('#s-gist').value=g.id;gistLink();
       toast('Đã tạo Gist mới');
     }else{
       await gh('/gists/'+gid(),{method:'PATCH',body:JSON.stringify({files:{[FILE]:{content}}})});
@@ -466,12 +535,12 @@ function renderStat(){
   // by category
   const by={};items.forEach(i=>by[i.category]=(by[i.category]||0)+i.amount);
   const arr=Object.entries(by).filter(x=>x[1]!==0).sort((a,b)=>b[1]-a[1]);
-  $('#s-cats').innerHTML=arr.length?arr.map(([c,v])=>`<div class="cr"><div class="t"><span>${esc(c)}</span><span><b>${money(v)}</b> <span class="mut">${Math.round(v/total*100)}%</span></span></div><div class="bar"><i style="width:${v/total*100}%;background:${catColor(c)}"></i></div></div>`).join(''):'<div class="mut">Chưa có dữ liệu.</div>';
+  $('#s-cats').innerHTML=arr.length?arr.map(([c,v])=>`<div class="cr" data-sc="${esc(c)}" role="button" tabindex="0" style="cursor:pointer"><div class="t"><span>${esc(c)} <span class="mut">›</span></span><span><b>${money(v)}</b> <span class="mut">${Math.round(v/total*100)}%</span></span></div><div class="bar"><i style="width:${v/total*100}%;background:${catColor(c)}"></i></div></div>`).join(''):'<div class="mut">Chưa có dữ liệu.</div>';
   $('#s-budget').innerHTML=budgetHTML();
 }
 
 function renderSet(){
-  $('#s-token').value=tok();$('#s-gist').value=gid();zlFill();
+  $('#s-token').value=tok();$('#s-gist').value=gid();if(document.activeElement!==$('#s-uid'))$('#s-uid').value=localStorage.getItem(K.uid)||'';gistLink();zlFill();
   kSet($('#s-budget-in'),data.budget);
   $('#s-catlist').innerHTML=data.categories.map((c,i)=>`<div class="catrow"><span><i style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${catColor(c)};margin-right:8px"></i>${esc(c)}</span><button class="sec sm" data-delcat="${i}">Xóa</button></div>`).join('');
 }
@@ -508,11 +577,15 @@ function kField(el,preview,host){
 ['#a-amt','#s-budget-in'].forEach(s=>{bindMoney($(s));kField($(s),true,s==='#a-amt'?$('#a-kp'):null)});
 
 /* ---------- events ---------- */
-$$('.tabs button').forEach(b=>b.onclick=()=>{
-  $$('.tabs button').forEach(x=>x.classList.toggle('on',x===b));
-  $$('.page').forEach(p=>p.classList.toggle('on',p.id==='p-'+b.dataset.tab));
-  window.scrollTo(0,0);
-});
+function showPage(name){
+  $$('.tabs button').forEach(x=>x.classList.toggle('on',x.dataset.tab===name));
+  $$('.page').forEach(p=>p.classList.toggle('on',p.id==='p-'+name));
+}
+function showTab(name){
+  showPage(name);window.scrollTo(0,0);
+  if(name==='add'){const a=$('#a-amt');if(a)a.focus()}   /* mở màn nhập: con trỏ vào Số tiền, bàn phím số */
+}
+$$('.tabs button').forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
 $$('[data-seg] button').forEach(b=>b.onclick=()=>{view.mode=b.dataset.m;renderAll()});
 $$('[data-nav]').forEach(b=>b.onclick=()=>shift(+b.dataset.nav));
 $$('[data-today]').forEach(b=>b.onclick=e=>{e.preventDefault();view.anchor=today();renderAll()});
@@ -540,16 +613,16 @@ function dLabel(){
 $('#a-cats').onclick=e=>{const b=e.target.closest('[data-c]');if(b)setAddCat(b.dataset.c)};
 $('#a-date').addEventListener('change',dLabel);
 $('#a-note').addEventListener('input',e=>{const c=sugCat[e.target.value.trim().toLowerCase()];if(c)setAddCat(c)});
-$('#a-note').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('#a-amt').focus()}});
+$('#a-note').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('#a-save').click()}});
 $('#a-save').onclick=()=>{
   const date=$('#a-date').value||today(),note=$('#a-note').value.trim(),category=$('#a-cat').value,amount=kval($('#a-amt'));
   if(!amount){toast('Nhập số tiền');$('#a-amt').focus();return}
   const it={id:uid(),date,note,category,amount};data.items.push(it);zlNew(it);
   $('#a-note').value='';$('#a-amt').value='';kRefresh($('#a-amt'));
   toast('Đã lưu '+money(amount));
-  renderAll();save();$('#a-note').focus();
+  renderAll();save();$('#a-amt').focus();
 };
-$('#a-amt').addEventListener('keydown',e=>{if(e.key==='Enter')$('#a-save').click()});
+$('#a-amt').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('#a-note').focus()}});
 
 /* Hộp xác nhận tự vẽ (hộp thoại gốc của trình duyệt có thể bị chặn) */
 function askConfirm(msg,yes){
@@ -601,8 +674,8 @@ $('#e-del').onclick=async()=>{
 $('#s-connect').onclick=async()=>{
   const t=$('#s-token').value.trim(),g=$('#s-gist').value.trim();
   if(!t){toast('Nhập GitHub token');return}
-  localStorage.setItem(K.token,t);
-  if(g){localStorage.setItem(K.gist,g);await load();toast('Đã kết nối')}
+  localStorage.setItem(K.token,t);localStorage.setItem(K.uid,$('#s-uid').value.trim());
+  if(g){localStorage.setItem(K.gist,g);gistLink();const ok=await load();toast(ok?'Đã kết nối':'Chưa kết nối được, xem dòng trạng thái phía trên')}
   else{localStorage.removeItem(K.gist);await save();renderSet();toast('Đã tạo Gist mới')}
 };
 $('#s-logout').onclick=async()=>{
@@ -870,11 +943,150 @@ $('#z-test').onclick=async()=>{
   }
 };
 
+$('#z-link').onclick=e=>{if($('#z-link').getAttribute('href')==='#'){e.preventDefault();toast('Hãy nhập Bot token trước')}};
+
+/* ---------- Link Gist ---------- */
+function gistLink(){
+  const g=gid(),u=(localStorage.getItem(K.uid)||'').trim();
+  $('#s-gistlink').innerHTML=g?`<a href="https://gist.github.com/${u?encodeURIComponent(u)+'/':''}${encodeURIComponent(g)}" target="_blank" rel="noopener">Mở Gist trên GitHub</a>`:'';
+}
+
+/* ---------- Popup chi tiết danh mục (Thống kê) ---------- */
+function showCatDetail(cat){
+  const[s,e]=range();
+  const items=data.items.filter(i=>i.category===cat&&inRange(i,s,e)).sort((a,b)=>b.date.localeCompare(a.date)||b.id.localeCompare(a.id));
+  $('#sc-title').textContent=cat;$('#sc-sub').textContent=label();$('#sc-total').textContent=money(sum(items));
+  $('#sc-list').innerHTML=items.length?items.map(i=>{
+    const rev=i.type==='void',gone=!!i.voidedBy;
+    const st=gone?'text-decoration:line-through;opacity:.55':'';
+    const tag=rev?'<span class="chip" style="background:var(--bad);color:#fff">Xóa</span> ':'';
+    return `<div class="srow"><div style="min-width:0"><div class="n" style="word-break:break-word;font-weight:500;${st}">${esc(i.note||'(không ghi chú)')}</div>${tag}<span class="mut">${dmy(i.date)}</span></div><div class="amt" style="${st}${rev?';color:var(--bad)':''}">${money(i.amount)}</div></div>`;
+  }).join(''):'<div class="mut" style="padding:12px 0">Không có khoản chi nào trong kỳ này.</div>';
+  $('#sc').classList.add('on');
+}
+const closeSc=()=>$('#sc').classList.remove('on');
+$('#s-cats').onclick=e=>{const r=e.target.closest('[data-sc]');if(r)showCatDetail(r.dataset.sc)};
+$('#s-cats').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){const r=e.target.closest('[data-sc]');if(r){e.preventDefault();showCatDetail(r.dataset.sc)}}};
+$('#sc-x').onclick=closeSc;
+$('#sc').onclick=e=>{if(e.target.id==='sc')closeSc()};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeSc();closeHelp()}});
+
+/* ---------- Hướng dẫn sử dụng ----------
+   Muốn thêm hướng dẫn cho chức năng mới: thêm một mục vào HELP (id, group, title, html).
+   Mục lục, nội dung và đường dẫn #help/<id> tự cập nhật, không cần sửa màn hình Cài đặt. */
+const HELP=[
+{id:'intro',group:'',title:'A. Giới thiệu ứng dụng',html:`
+<p><b>Spendlog</b> là ứng dụng ghi nhanh chi tiêu hàng ngày bằng <b>đồng (VNĐ)</b>. Bạn chỉ cần nhập số tiền, nội dung rồi bấm Lưu.</p>
+<p><b>Giải quyết vấn đề gì?</b> Ghi lại chi tiêu ngay lúc phát sinh, không cần mở bảng tính, và xem lại mình đã tiêu bao nhiêu, vào việc gì.</p>
+<p><b>Các chức năng chính:</b></p>
+<ul>
+<li><b>Nhập:</b> nhập nhanh số tiền (tính theo nghìn đồng), nội dung, danh mục, ngày.</li>
+<li><b>Lịch sử:</b> xem theo ngày, tuần, tháng. Bấm vào một khoản chi để sửa nội dung, danh mục hoặc xóa.</li>
+<li><b>Thống kê:</b> biểu đồ theo ngày và theo danh mục. Bấm vào một danh mục để xem các khoản chi tạo nên số tiền đó.</li>
+<li><b>Lọc:</b> lọc theo thời gian, danh mục, từ khóa, số tiền, rồi bấm Review để xem bảng tổng.</li>
+<li><b>Cài đặt:</b> ngân sách tháng, danh mục, import từ file CSV, kết nối GitHub, Zalo.</li>
+<li><b>Thông báo</b> qua Zalo mỗi khi có khoản chi mới hoặc được sửa (tùy chọn, đang thử nghiệm).</li>
+</ul>
+<p><b>Dành cho ai?</b> Cá nhân hoặc gia đình muốn tự theo dõi chi tiêu mà không cần kiến thức kỹ thuật. Dữ liệu là của riêng bạn, lưu trong tài khoản GitHub của bạn.</p>`},
+{id:'how',group:'',title:'B. Cách thức hoạt động',html:`
+<div class="flow"><div>✍️ Bạn nhập chi tiêu</div><span>→</span><div>📱 Spendlog<br><small>hiện ngay trên máy</small></div><span>→</span><div>☁️ GitHub Gist<br><small>lưu dữ liệu</small></div></div>
+<div class="flow"><div>📱 Spendlog</div><span>→</span><div>🤖 Zalo Bot</div><span>→</span><div>💬 Nhóm chat<br><small>nhận thông báo</small></div></div>
+<ol>
+<li><b>Bạn nhập và quản lý dữ liệu</b> ở các tab Nhập, Lịch sử.</li>
+<li><b>Ứng dụng lưu thông tin:</b> khoản chi hiện ngay trên máy, đồng thời được gửi lên một <b>Gist</b> (kho lưu file riêng tư) trong tài khoản GitHub của bạn, tên file <code>expenses.json</code>. Nhờ vậy bạn xem được dữ liệu trên nhiều thiết bị.</li>
+<li><b>Thống kê và hiển thị:</b> các số liệu được tính từ chính những khoản chi đã ghi.</li>
+<li><b>Kết nối dịch vụ ngoài:</b> GitHub để lưu dữ liệu; Zalo (tùy chọn) để gửi thông báo.</li>
+<li><b>Xóa khoản chi:</b> ứng dụng không xóa thẳng mà ghi thêm một dòng "Xóa" có số tiền âm, nên lịch sử luôn đầy đủ. Khoản đã lưu chỉ sửa được nội dung và danh mục.</li>
+</ol>`},
+{id:'install',group:'',title:'C. Hướng dẫn cài đặt',html:`
+<p><b>Cần chuẩn bị:</b></p>
+<ul>
+<li>Một trình duyệt hiện đại (Chrome, Safari, Edge) trên điện thoại hoặc máy tính.</li>
+<li>Một tài khoản <b>GitHub</b> (miễn phí).</li>
+<li>(Tùy chọn) tài khoản Zalo nếu muốn nhận thông báo.</li>
+</ul>
+<p><b>Thông tin cần có:</b> <b>User ID (Git ID)</b> và <b>GitHub Token</b>. Cách lấy ở mục Kết nối GitHub bên dưới.</p>
+<p><b>Các bước thiết lập ban đầu:</b></p>
+<ol>
+<li>Mở địa chỉ của ứng dụng trên trình duyệt.</li>
+<li>(Khuyên dùng) Cài lên màn hình chính. Android Chrome: menu ⋮ → "Cài đặt ứng dụng". iPhone Safari: nút Chia sẻ → "Thêm vào Màn hình chính".</li>
+<li>Vào <b>Cài đặt</b> → <b>Kết nối GitHub</b>, làm theo hướng dẫn kết nối GitHub bên dưới.</li>
+<li>(Tùy chọn) Cấu hình thông báo Zalo.</li>
+</ol>
+<p><b>Kiểm tra đã thành công:</b></p>
+<ul>
+<li>Ở đầu trang hiện <b>"Đã đồng bộ"</b> hoặc <b>"Đã lưu hh:mm"</b>.</li>
+<li>Nhập thử một khoản chi, rồi mở Gist trên GitHub (có liên kết trong Cài đặt) sẽ thấy file <code>expenses.json</code>.</li>
+</ul>`},
+{id:'github-connection',group:'D. Hướng dẫn kết nối dịch vụ',title:'1. Kết nối GitHub',html:`
+<p><b>Mục đích:</b> GitHub là nơi lưu dữ liệu chi tiêu của bạn (trong một Gist riêng tư). Không kết nối thì dữ liệu chỉ nằm trên thiết bị này.</p>
+<h4>Bước 1. Lấy User ID (Git ID)</h4>
+<p>Đây là <b>tên đăng nhập GitHub</b> của bạn. Cách xem: đăng nhập github.com, bấm ảnh đại diện ở góc trên bên phải, dòng đầu ghi "Signed in as <i>tên-của-bạn</i>".</p>
+<h4>Bước 2. Tạo GitHub Token (ô "Mật khẩu")</h4>
+<div class="warn">Ô này tên là "Mật khẩu" cho dễ hiểu, nhưng thực chất là <b>token</b>, một mã riêng chỉ cho phép lưu file Gist. <b>Đừng nhập mật khẩu đăng nhập GitHub.</b></div>
+<ol>
+<li>Mở <a href="https://github.com/settings/tokens/new?scopes=gist&description=spendlog" target="_blank" rel="noopener">trang tạo token</a> (đã chọn sẵn quyền <code>gist</code>).</li>
+<li>Ô <b>Note</b> ghi "spendlog". Ô <b>Expiration</b> chọn thời hạn (ví dụ 1 năm hoặc No expiration).</li>
+<li>Chỉ tích quyền <b>gist</b>, kéo xuống cuối và bấm <b>Generate token</b>.</li>
+<li><b>Sao chép ngay</b> chuỗi bắt đầu bằng <code>ghp_</code>. GitHub chỉ hiện một lần.</li>
+</ol>
+<h4>Bước 3. Nhập vào Cài đặt</h4>
+<div class="mock"><div class="mt">Cài đặt › Kết nối GitHub</div>
+<div class="mf"><small>User ID (Git ID)</small><div>ten-dang-nhap-github</div></div>
+<div class="mf hl"><small>Mật khẩu (GitHub Token)</small><div>ghp_••••••••••••••••</div></div>
+<div class="mb">Kết nối &amp; tải</div></div>
+<ol>
+<li>Vào <b>Cài đặt</b> → <b>Kết nối GitHub</b>.</li>
+<li>Dán tên đăng nhập vào <b>User ID (Git ID)</b>.</li>
+<li>Dán token vào <b>Mật khẩu (GitHub Token)</b>.</li>
+<li>Dùng lần đầu: để trống <b>Gist ID</b> (app tự tạo Gist). Dùng thêm thiết bị khác: nhập Gist ID đã có.</li>
+<li>Bấm <b>Kết nối &amp; tải</b>.</li>
+</ol>
+<h4>Bước 4. Kiểm tra kết nối</h4>
+<ul>
+<li>Ở đầu trang hiện "Đã đồng bộ" hoặc "Đã lưu".</li>
+<li>Bấm liên kết <b>Mở Gist trên GitHub</b> trong Cài đặt để xem file <code>expenses.json</code>.</li>
+<li>Lỗi "401": token sai hoặc hết hạn, hãy tạo token mới. Lỗi "404": Gist ID sai.</li>
+</ul>`},
+{id:'zalo-connection',group:'D. Hướng dẫn kết nối dịch vụ',title:'2. Thông báo Zalo (thử nghiệm)',html:`
+<div class="warn"><b>Tính năng đang thử nghiệm.</b> Chưa kiểm chứng đầy đủ với Zalo Bot thật, tin nhắn có thể không đến. Chưa rõ Zalo Bot có gửi vào nhóm được không; tin chủ yếu gửi riêng cho người đã nhắn bot.</div>
+<ol>
+<li>Mở Zalo, tìm tài khoản chính thức <b>Zalo Bot Manager</b>, chọn menu <b>Tạo bot</b> và đặt tên bắt đầu bằng "Bot".</li>
+<li>Zalo nhắn lại cho bạn <b>Bot token</b>.</li>
+<li>Vào Cài đặt → Thông báo Zalo, dán token, bấm liên kết <b>mở getUpdates</b> (trang chờ khoảng 30 giây). Trong lúc chờ, nhắn một tin cho bot trên Zalo, rồi tìm <code>chat</code> → <code>id</code> làm Chat ID.</li>
+<li>Bấm <b>Lưu</b>, sau đó bấm <b>Gửi thử</b> và kiểm tra Zalo.</li>
+</ol>`}
+];
+function renderHelp(){
+  let toc='',body='',lastG=null;
+  HELP.forEach(h=>{
+    const g=h.group||'';
+    if(g!==lastG){
+      lastG=g;
+      if(g){toc+=`<li class="gl">${esc(g)}</li>`;body+=`<h2 class="gh">${esc(g)}</h2>`}
+    }
+    toc+=`<li class="${g?'sub':''}"><a href="#help/${h.id}" data-hs="${h.id}">${esc(h.title)}</a></li>`;
+    body+=`<section id="help-${h.id}"><h3>${esc(h.title)}</h3>${h.html}<p><a class="mut" href="#help" data-hs="">↑ Mục lục</a></p></section>`;
+  });
+  $('#help-toc').innerHTML=toc;$('#help-body').innerHTML=body;
+}
+function openHelp(sec){
+  $('#hp').classList.add('on');
+  setTimeout(()=>{const el=sec&&document.getElementById('help-'+sec);if(el)el.scrollIntoView({block:'start'});else $('#hp-body').scrollTop=0},30);
+}
+const closeHelp=()=>$('#hp').classList.remove('on');
+document.addEventListener('click',e=>{const a=e.target.closest('[data-hs]');if(!a)return;e.preventDefault();openHelp(a.dataset.hs)});
+$('#hp-x').onclick=closeHelp;
+$('#hp').onclick=e=>{if(e.target.id==='hp')closeHelp()};
+
 /* ---------- init ---------- */
 $('#a-date').value=today();dLabel();
 renderAll();fltPreset('month');
 if(localStorage.getItem(K.dirty)&&tok()){save()}else{load()}
-if(!tok())$$('.tabs button')[4].click();
+renderHelp();
+if(!tok())showTab('set');
+else{try{$('#a-amt').focus()}catch(e){}}
+if(/^#help/.test(location.hash))openHelp(location.hash.split('/')[1]||'');
 })();
 if('serviceWorker' in navigator){
   const had=!!navigator.serviceWorker.controller;let rl=false;
