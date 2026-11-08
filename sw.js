@@ -1,11 +1,11 @@
 // Service worker: cache vỏ app để mở được khi offline.
 // Khi sửa index.html, hãy đổi số phiên bản VERSION để máy cập nhật.
-const VERSION = 'v4';
+const VERSION = 'v5';
 const CACHE = 'spendlog-' + VERSION;
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(CACHE).then(c => Promise.all(SHELL.map(u => c.add(new Request(u, { cache: 'reload' }))))).then(() => self.skipWaiting()));
 });
 self.addEventListener('activate', e => {
   e.waitUntil(
@@ -21,7 +21,7 @@ self.addEventListener('fetch', e => {
   if (req.mode === 'navigate') {
     // Ưu tiên bản mới từ mạng, mất mạng thì dùng bản đã lưu
     e.respondWith(
-      fetch(req).then(r => { const copy = r.clone(); caches.open(CACHE).then(c => c.put('./index.html', copy)); return r; })
+      fetch(req.url, { cache: 'no-store' }).then(r => { const copy = r.clone(); caches.open(CACHE).then(c => c.put('./index.html', copy)); return r; })
         .catch(() => caches.match('./index.html'))
     );
     return;

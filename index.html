@@ -23,6 +23,11 @@ h2{font-size:17px;margin:0 0 10px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
 label{display:block;font-size:13px;color:var(--mut);margin:10px 0 4px}
 input,select{width:100%;font:inherit;color:var(--text);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:11px 12px;min-height:46px}
+#cf{position:fixed;inset:0;background:#0008;display:none;align-items:center;justify-content:center;z-index:30;padding:16px}
+#cf.on{display:flex}
+#cf .sheet{background:var(--card);width:100%;max-width:420px;border-radius:16px;padding:18px;border:1px solid var(--line)}
+#cf-msg{white-space:pre-line;margin-bottom:16px}
+input:disabled{opacity:.6;cursor:not-allowed}
 input:focus,select:focus{outline:2px solid var(--pri);border-color:transparent}
 button{font:inherit;cursor:pointer;border:0;border-radius:10px;padding:12px 16px;min-height:46px;background:var(--pri);color:#fff;font-weight:600}
 @media(prefers-color-scheme:dark){button{color:#042f2e}}
@@ -235,7 +240,7 @@ table.rt tfoot td{font-weight:700;font-size:16px;border-top:2px solid var(--text
       <div style="margin-top:10px"><button id="imp-go" style="width:100%;display:none"></button></div>
     </div>
   </section>
-  <footer class="ft">Spendlog · v20261107</footer>
+  <footer class="ft">Spendlog · v20261108</footer>
 </main>
 
 <nav class="tabs">
@@ -247,11 +252,12 @@ table.rt tfoot td{font-weight:700;font-size:16px;border-top:2px solid var(--text
 </nav>
 
 <div id="modal"><div class="sheet">
-  <h2>Sửa khoản chi</h2>
-  <label>Ngày</label><input type="date" id="e-date">
+  <h2>Chi tiết khoản chi</h2>
+  <div class="mut">Chỉ sửa được nội dung và danh mục, hoặc xóa. Muốn đổi số tiền hay ngày: xóa rồi nhập lại.</div>
+  <label>Ngày</label><input type="date" id="e-date" disabled>
+  <label>Số tiền</label><input type="text" id="e-amt" disabled>
   <label>Nội dung</label><input type="text" id="e-note">
   <label>Danh mục</label><select id="e-cat"></select>
-  <label>Số tiền (nghìn đồng)</label><input type="text" id="e-amt" inputmode="numeric" placeholder="35">
   <div class="row" style="margin-top:14px">
     <button class="bad" id="e-del">Xóa</button>
     <button class="sec" id="e-cancel">Hủy</button>
@@ -268,6 +274,7 @@ table.rt tfoot td{font-weight:700;font-size:16px;border-top:2px solid var(--text
   </table>
   <div class="row" style="margin-top:12px"><button class="sec" id="rv-copy">Sao chép (Excel)</button><button id="rv-close">Đóng</button></div>
 </div></div>
+<div id="cf"><div class="sheet"><div id="cf-msg"></div><div class="row"><button class="sec" id="cf-no">Hủy</button><button class="bad" id="cf-yes">Xác nhận</button></div></div></div>
 <div id="toast"></div>
 
 <script>
@@ -486,7 +493,7 @@ function kField(el,preview,host){
   const sf=document.createElement('span');sf.className='suf';sf.textContent='.000 ₫';w.appendChild(sf);
   if(preview){const p=document.createElement('div');p.className='kp';host?host.appendChild(p):w.after(p);el._kp=p;el.addEventListener('input',()=>kRefresh(el));kRefresh(el)}
 }
-['#a-amt','#e-amt','#s-budget-in'].forEach(s=>{bindMoney($(s));kField($(s),true,s==='#a-amt'?$('#a-kp'):null)});
+['#a-amt','#s-budget-in'].forEach(s=>{bindMoney($(s));kField($(s),true,s==='#a-amt'?$('#a-kp'):null)});
 
 /* ---------- events ---------- */
 $$('.tabs button').forEach(b=>b.onclick=()=>{
@@ -532,6 +539,15 @@ $('#a-save').onclick=()=>{
 };
 $('#a-amt').addEventListener('keydown',e=>{if(e.key==='Enter')$('#a-save').click()});
 
+/* Hộp xác nhận tự vẽ (hộp thoại gốc của trình duyệt có thể bị chặn) */
+function askConfirm(msg,yes){
+  return new Promise(res=>{
+    $('#cf-msg').textContent=msg;$('#cf-yes').textContent=yes||'Xác nhận';$('#cf').classList.add('on');
+    const done=v=>{$('#cf').classList.remove('on');$('#cf-yes').onclick=$('#cf-no').onclick=$('#cf').onclick=null;res(v)};
+    $('#cf-yes').onclick=()=>done(true);$('#cf-no').onclick=()=>done(false);
+    $('#cf').onclick=e=>{if(e.target.id==='cf')done(false)};
+  });
+}
 function openEdit(id){
   const i=data.items.find(x=>x.id===id);if(!i)return;
   if(i.type==='void'||i.voidedBy){toast('Khoản này đã bị xóa — không thể sửa');return}
@@ -539,17 +555,17 @@ function openEdit(id){
   fillCats('#e-cat',false,i.category);
   if(![...$('#e-cat').options].some(o=>o.value===i.category)){$('#e-cat').add(new Option(i.category));}
   $('#e-cat').value=i.category;
-  kSet($('#e-amt'),i.amount);
+  $('#e-amt').value=money(i.amount);
   $('#modal').classList.add('on');
 }
-document.addEventListener('click',e=>{
+document.addEventListener('click',async e=>{
   const it=e.target.closest('.item,[data-edit]');
   if(it)openEdit(it.dataset.edit||it.dataset.id);
   const dc=e.target.closest('[data-delcat]');
   if(dc){
     const c=data.categories[+dc.dataset.delcat];
     if(data.categories.length<=1){toast('Cần ít nhất 1 danh mục');return}
-    if(!confirm('Xóa danh mục "'+c+'"? Các khoản chi cũ vẫn giữ nguyên tên danh mục.'))return;
+    if(!await askConfirm('Xóa danh mục "'+c+'"?\nCác khoản chi cũ vẫn giữ nguyên tên danh mục.','Xóa'))return;
     data.categories.splice(+dc.dataset.delcat,1);renderAll();save();
   }
 });
@@ -558,13 +574,12 @@ $('#e-cancel').onclick=closeM;
 $('#modal').onclick=e=>{if(e.target.id==='modal')closeM()};
 $('#e-save').onclick=()=>{
   const i=data.items.find(x=>x.id===editId);if(!i)return closeM();
-  const a=kval($('#e-amt'));if(!a){toast('Nhập số tiền');return}
-  i.date=$('#e-date').value||i.date;i.note=$('#e-note').value.trim();i.category=$('#e-cat').value;i.amount=a;
+  i.note=$('#e-note').value.trim();i.category=$('#e-cat').value;
   closeM();renderAll();save();toast('Đã cập nhật');
 };
-$('#e-del').onclick=()=>{
+$('#e-del').onclick=async()=>{
   const i=data.items.find(x=>x.id===editId);if(!i)return closeM();
-  if(!confirm('Xóa khoản chi này?\nApp sẽ giữ lại khoản gốc và thêm một dòng "Xóa" với số tiền âm.'))return;
+  if(!await askConfirm('Xóa khoản chi này?\nApp giữ lại khoản gốc và thêm một dòng "Xóa" với số tiền âm.','Xóa'))return;
   const r={id:uid(),date:i.date,note:'Xóa: '+(i.note||''),category:i.category,amount:-i.amount,type:'void',ref:i.id,at:new Date().toISOString()};
   i.voidedBy=r.id;data.items.push(r);
   closeM();renderAll();save();toast('Đã xóa (ghi dòng âm)');
@@ -577,8 +592,8 @@ $('#s-connect').onclick=async()=>{
   if(g){localStorage.setItem(K.gist,g);await load();toast('Đã kết nối')}
   else{localStorage.removeItem(K.gist);await save();renderSet();toast('Đã tạo Gist mới')}
 };
-$('#s-logout').onclick=()=>{
-  if(!confirm('Xóa token và dữ liệu cache khỏi thiết bị này? (Dữ liệu trên Gist vẫn còn)'))return;
+$('#s-logout').onclick=async()=>{
+  if(!await askConfirm('Xóa token và dữ liệu cache khỏi thiết bị này?\n(Dữ liệu trên Gist vẫn còn)','Đăng xuất'))return;
   Object.values(K).forEach(k=>localStorage.removeItem(k));
   data={categories:[...DEF_CATS],budget:0,items:[]};status('Đã đăng xuất');renderAll();
 };
@@ -795,7 +810,11 @@ renderAll();fltPreset('month');
 if(localStorage.getItem(K.dirty)&&tok()){save()}else{load()}
 if(!tok())$$('.tabs button')[4].click();
 })();
-if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{})})}
+if('serviceWorker' in navigator){
+  const had=!!navigator.serviceWorker.controller;let rl=false;
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{if(had&&!rl){rl=true;location.reload()}});
+  window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').then(r=>r.update()).catch(()=>{})});
+}
 </script>
 </body>
 </html>
