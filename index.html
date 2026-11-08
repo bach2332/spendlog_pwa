@@ -220,6 +220,18 @@ table.rt tfoot td{font-weight:700;font-size:16px;border-top:2px solid var(--text
       <div style="margin-top:12px"><button id="s-budget-save" style="width:100%">Lưu ngân sách</button></div>
     </div>
     <div class="card">
+      <h2>Thông báo Zalo <span class="chip" style="background:var(--warn);color:#fff;vertical-align:middle">Thử nghiệm</span></h2>
+      <div class="mut" style="margin-bottom:4px"><b>Tính năng đang thử nghiệm</b>: chưa kiểm chứng đầy đủ với Zalo Bot thật, tin nhắn có thể không đến hoặc không báo lỗi.</div>
+      <div class="mut">Tùy chọn. Điền đủ <b>Bot token</b> và <b>Chat ID</b> thì mới bật. Để trống thì app chạy bình thường, không gửi gì. Mỗi khoản chi <b>thêm mới</b> hoặc <b>sửa</b> gửi đúng 1 tin.</div>
+      <label>Bot token</label>
+      <input type="password" id="z-token" placeholder="123456:ABC..." autocomplete="off">
+      <label>Chat ID</label>
+      <input type="text" id="z-chat" placeholder="VD: abc.xyz" autocomplete="off">
+      <div class="mut" style="margin-top:6px">Chưa có Chat ID? Bấm <a id="z-link" href="#" target="_blank" rel="noopener">mở getUpdates</a> (trang chờ khoảng 30 giây), trong lúc chờ hãy nhắn 1 tin cho bot trên Zalo, rồi tìm <code>chat</code> → <code>id</code>.</div>
+      <div class="row" style="margin-top:12px"><button id="z-save">Lưu</button><button class="sec" id="z-test">Gửi thử</button><button class="sec" id="z-off">Tắt</button></div>
+      <div id="z-state" class="mut" style="margin-top:8px"></div>
+    </div>
+    <div class="card">
       <h2>Danh mục</h2>
       <div id="s-catlist"></div>
       <div class="row" style="margin-top:10px"><input type="text" id="s-newcat" placeholder="Tên danh mục mới"><button id="s-addcat" style="flex:0 0 auto">Thêm</button></div>
@@ -459,7 +471,7 @@ function renderStat(){
 }
 
 function renderSet(){
-  $('#s-token').value=tok();$('#s-gist').value=gid();
+  $('#s-token').value=tok();$('#s-gist').value=gid();zlFill();
   kSet($('#s-budget-in'),data.budget);
   $('#s-catlist').innerHTML=data.categories.map((c,i)=>`<div class="catrow"><span><i style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${catColor(c)};margin-right:8px"></i>${esc(c)}</span><button class="sec sm" data-delcat="${i}">Xóa</button></div>`).join('');
 }
@@ -532,7 +544,7 @@ $('#a-note').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault
 $('#a-save').onclick=()=>{
   const date=$('#a-date').value||today(),note=$('#a-note').value.trim(),category=$('#a-cat').value,amount=kval($('#a-amt'));
   if(!amount){toast('Nhập số tiền');$('#a-amt').focus();return}
-  data.items.push({id:uid(),date,note,category,amount});
+  const it={id:uid(),date,note,category,amount};data.items.push(it);zlNew(it);
   $('#a-note').value='';$('#a-amt').value='';kRefresh($('#a-amt'));
   toast('Đã lưu '+money(amount));
   renderAll();save();$('#a-note').focus();
@@ -574,7 +586,8 @@ $('#e-cancel').onclick=closeM;
 $('#modal').onclick=e=>{if(e.target.id==='modal')closeM()};
 $('#e-save').onclick=()=>{
   const i=data.items.find(x=>x.id===editId);if(!i)return closeM();
-  i.note=$('#e-note').value.trim();i.category=$('#e-cat').value;
+  const oldN=i.note,oldC=i.category;
+  i.note=$('#e-note').value.trim();i.category=$('#e-cat').value;zlEdit(i,oldN,oldC);
   closeM();renderAll();save();toast('Đã cập nhật');
 };
 $('#e-del').onclick=async()=>{
@@ -802,6 +815,59 @@ $('#imp-tpl').onclick=()=>{
   a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
   a.download='mau-chi-tieu.csv';document.body.appendChild(a);a.click();a.remove();
   setTimeout(()=>URL.revokeObjectURL(a.href),1500);
+};
+
+/* ---------- Zalo Bot (tùy chọn) ---------- */
+const ZK={t:'zl_token',c:'zl_chat'};
+const ZAPI='https://bot-api.zaloplatforms.com/bot';
+function zlCfg(){let t='',c='';try{t=localStorage.getItem(ZK.t)||'';c=localStorage.getItem(ZK.c)||''}catch(e){}return t&&c?{t,c}:null}
+function zlLink(){const t=$('#z-token').value.trim();$('#z-link').href=/^[\w:.\-]+$/.test(t)?ZAPI+t+'/getUpdates':'#'}
+function zlState(){$('#z-state').textContent=zlCfg()?'Đang bật: khoản chi mới hoặc được sửa sẽ gửi tin Zalo.':'Đang tắt: không gửi tin nhắn.'}
+function zlFill(){
+  const z=zlCfg();
+  if(document.activeElement!==$('#z-token'))$('#z-token').value=z?z.t:'';
+  if(document.activeElement!==$('#z-chat'))$('#z-chat').value=z?z.c:'';
+  zlLink();zlState();
+}
+/* Gửi dạng form-urlencoded + no-cors: không cần preflight, tin vẫn đi dù Zalo không bật CORS. Gửi 1 lần, không tự gửi lại (tránh trùng tin). */
+function zlSend(text){
+  const z=zlCfg();if(!z)return;
+  try{fetch(ZAPI+z.t+'/sendMessage',{method:'POST',mode:'no-cors',body:new URLSearchParams({chat_id:z.c,text:String(text).slice(0,2000)})}).catch(()=>toast('Không gửi được tin Zalo (kiểm tra mạng)'))}catch(e){}
+}
+function zlNew(it){
+  const day=sum(data.items.filter(x=>x.date===it.date));
+  zlSend('🆕 Chi tiêu mới\n'+money(it.amount)+(it.note?' · '+it.note:'')+'\nDanh mục: '+it.category+' · '+dmy(it.date)+'\nTổng ngày '+dmy(it.date).slice(0,5)+': '+money(day));
+}
+function zlEdit(i,oldN,oldC){
+  const ch=[];
+  if((oldN||'')!==(i.note||''))ch.push('Nội dung: '+(oldN||'(trống)')+' → '+(i.note||'(trống)'));
+  if(oldC!==i.category)ch.push('Danh mục: '+oldC+' → '+i.category);
+  if(!ch.length)return;
+  zlSend('✏️ Đã sửa khoản chi\n'+money(i.amount)+' · '+dmy(i.date)+'\n'+ch.join('\n'));
+}
+$('#z-token').addEventListener('input',zlLink);
+$('#z-save').onclick=()=>{
+  const t=$('#z-token').value.trim(),c=$('#z-chat').value.trim();
+  if(!t&&!c){$('#z-off').click();return}
+  if(!t||!c){toast('Cần điền cả Bot token và Chat ID');return}
+  if(!/^[\w:.\-]+$/.test(t)){toast('Bot token có ký tự không hợp lệ');return}
+  try{localStorage.setItem(ZK.t,t);localStorage.setItem(ZK.c,c)}catch(e){toast('Không lưu được trên trình duyệt này');return}
+  zlState();toast('Đã bật thông báo Zalo');
+};
+$('#z-off').onclick=()=>{
+  try{localStorage.removeItem(ZK.t);localStorage.removeItem(ZK.c)}catch(e){}
+  $('#z-token').value='';$('#z-chat').value='';zlLink();zlState();toast('Đã tắt thông báo Zalo');
+};
+$('#z-test').onclick=async()=>{
+  const z=zlCfg();if(!z){toast('Điền token, Chat ID và bấm Lưu trước');return}
+  $('#z-state').textContent='Đang gửi thử...';
+  try{
+    const r=await fetch(ZAPI+z.t+'/sendMessage',{method:'POST',body:new URLSearchParams({chat_id:z.c,text:'✅ Spendlog: kết nối Zalo thành công'})});
+    const j=await r.json();
+    $('#z-state').textContent=j.ok?'Gửi thử thành công, hãy kiểm tra Zalo.':'Zalo báo lỗi: '+(j.description||j.error_code||'không rõ');
+  }catch(e){
+    $('#z-state').textContent='Không đọc được phản hồi (trình duyệt có thể chặn đọc kết quả). Hãy mở Zalo xem đã nhận tin thử chưa. Nếu đã nhận thì vẫn dùng bình thường.';
+  }
 };
 
 /* ---------- init ---------- */
