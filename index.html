@@ -150,10 +150,15 @@ table.rt tfoot td{font-weight:700;font-size:16px;border-top:2px solid var(--text
 .mock .mb{display:inline-block;background:var(--pri);color:#fff;border-radius:8px;padding:6px 12px;font-weight:600;font-size:14px;margin-top:4px}
 @media(prefers-color-scheme:dark){.mock .mb{color:#042f2e}}
 .catrow{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}
+.wx{display:flex;align-items:center;gap:12px;padding:10px 14px}
+.wx .ic{font-size:34px;line-height:1}
+.wx .m{flex:1;min-width:0}.wx .m b{font-size:14px}
+.wx .tp{font-size:26px;font-weight:700;white-space:nowrap}
 </style>
 </head>
 <body>
 <main>
+  <div class="card wx" id="wx" hidden></div>
   <div id="status"></div>
 
   <!-- NHẬP -->
@@ -1108,11 +1113,41 @@ document.addEventListener('click',e=>{const a=e.target.closest('[data-hs]');if(!
 $('#hp-x').onclick=closeHelp;
 $('#hp').onclick=e=>{if(e.target.id==='hp')closeHelp()};
 
+/* ---------- Thời tiết TP. Hồ Chí Minh (Open-Meteo, không cần khóa API) ---------- */
+const WX_KEY='ct_wx';
+const WX_URL='https://api.open-meteo.com/v1/forecast?latitude=10.82&longitude=106.63&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Asia%2FHo_Chi_Minh&forecast_days=1';
+function wxInfo(c){
+  if(c===0)return['☀️','Trời quang'];if(c===1)return['🌤️','Ít mây'];if(c===2)return['⛅','Mây rải rác'];if(c===3)return['☁️','Nhiều mây'];
+  if(c===45||c===48)return['🌫️','Sương mù'];if(c>=51&&c<=57)return['🌦️','Mưa phùn'];
+  if(c===61||c===80)return['🌦️','Mưa nhỏ'];if(c===63||c===81||c===66)return['🌧️','Mưa vừa'];if(c===65||c===67||c===82)return['🌧️','Mưa to'];
+  if(c>=95)return['⛈️','Dông'];return['🌡️','Thời tiết'];
+}
+function wxRender(w,stale){
+  const el=$('#wx');if(!w||!w.cur){el.hidden=true;return}
+  const[ic,tx]=wxInfo(w.code),r=n=>n==null?'–':Math.round(n);
+  el.hidden=false;
+  el.innerHTML=`<div class="ic" aria-hidden="true">${ic}</div><div class="m"><b>TP. Hồ Chí Minh · Hôm nay</b><div class="mut">${tx} · Cao ${r(w.max)}° / Thấp ${r(w.min)}° · Mưa ${r(w.rain)}% · Ẩm ${r(w.hum)}%${stale?' · (dữ liệu cũ)':''}</div></div><div class="tp">${r(w.cur)}°C</div>`;
+}
+async function wxLoad(){
+  let old=null;try{old=JSON.parse(localStorage.getItem(WX_KEY)||'null')}catch(e){}
+  if(old&&old.day===today())wxRender(old,false);else if(old)wxRender(old,true);
+  if(old&&old.day===today()&&Date.now()-old.at<30*60*1000)return;   /* còn mới (<30 phút) thì khỏi gọi lại */
+  try{
+    const r=await fetch(WX_URL,{cache:'no-store'});if(!r.ok)throw new Error(r.status);
+    const j=await r.json(),c=j.current||{},d=j.daily||{};
+    const w={day:today(),at:Date.now(),cur:c.temperature_2m,hum:c.relative_humidity_2m,code:c.weather_code,max:(d.temperature_2m_max||[])[0],min:(d.temperature_2m_min||[])[0],rain:(d.precipitation_probability_max||[])[0]};
+    if(typeof w.cur!=='number')throw new Error('no data');
+    try{localStorage.setItem(WX_KEY,JSON.stringify(w))}catch(e){}
+    wxRender(w,false);
+  }catch(e){if(!old)$('#wx').hidden=true}
+}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')wxLoad()});
+
 /* ---------- init ---------- */
 $('#a-date').value=today();dLabel();
 renderAll();fltPreset('month');
 if(localStorage.getItem(K.dirty)&&tok()){save()}else{load()}
-renderHelp();
+renderHelp();wxLoad();
 if(!tok())showTab('set');
 else{try{$('#a-amt').focus()}catch(e){}}
 if(/^#help/.test(location.hash))openHelp(location.hash.split('/')[1]||'');

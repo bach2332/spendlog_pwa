@@ -18,6 +18,7 @@ A fast daily expense logger that runs entirely in the browser as an installable 
 | **Monthly budget** | Set a limit; the progress bar turns amber at 80% and red at 100%. |
 | **GitHub Gist storage** | Data syncs to a secret Gist; works across devices with the same token and Gist ID. |
 | **Zalo notifications** | Optional, **experimental**: a Zalo bot message for each new or edited entry. |
+| **Weather** | A strip at the top shows today's weather for Ho Chi Minh City (temperature, high/low, rain chance, humidity) from the free [Open-Meteo](https://open-meteo.com/) API (no key). Cached for 30 minutes; if offline, the last value is shown marked as old; if nothing is available the strip is hidden. |
 | **Offline** | The app shell and the last synced data are cached on the device. |
 | **User Guide** | Built-in popup with setup instructions (GitHub, Zalo). |
 
