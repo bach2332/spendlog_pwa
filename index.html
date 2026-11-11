@@ -206,6 +206,7 @@ table.rt tfoot td{font-weight:700;font-size:16px;border-top:2px solid var(--text
       <div style="text-align:center"><div class="mut">Tổng chi</div><div class="big" id="s-total"></div></div>
     </div>
     <div class="card" id="s-bars-card"><h2>Chi theo ngày</h2><div id="s-bars"></div></div>
+    <div class="card"><h2>Tổng quan theo danh mục</h2><div id="s-radar"></div></div>
     <div class="card"><h2>Theo danh mục</h2><div id="s-cats"></div></div>
     <div class="card" id="s-budget"></div>
   </section>
@@ -303,7 +304,7 @@ table.rt tfoot td{font-weight:700;font-size:16px;border-top:2px solid var(--text
     </div>
     <a class="menu" id="s-guide" href="#help" data-hs=""><span>Hướng dẫn sử dụng (User Guide)</span><span class="mut">›</span></a>
   </section>
-  <footer class="ft">Spendlog · v20261108</footer>
+  <footer class="ft">Spendlog · v20261111</footer>
 </main>
 
 <nav class="tabs">
@@ -536,7 +537,34 @@ function renderStat(){
   const by={};items.forEach(i=>by[i.category]=(by[i.category]||0)+i.amount);
   const arr=Object.entries(by).filter(x=>x[1]!==0).sort((a,b)=>b[1]-a[1]);
   $('#s-cats').innerHTML=arr.length?arr.map(([c,v])=>`<div class="cr" data-sc="${esc(c)}" role="button" tabindex="0" style="cursor:pointer"><div class="t"><span>${esc(c)} <span class="mut">›</span></span><span><b>${money(v)}</b> <span class="mut">${Math.round(v/total*100)}%</span></span></div><div class="bar"><i style="width:${v/total*100}%;background:${catColor(c)}"></i></div></div>`).join(''):'<div class="mut">Chưa có dữ liệu.</div>';
+  renderRadar(arr.filter(x=>x[1]>0));
   $('#s-budget').innerHTML=budgetHTML();
+}
+
+/* Biểu đồ radar: mỗi trục là một danh mục, điểm càng xa tâm thì chi càng nhiều */
+function renderRadar(arr){
+  const box=$('#s-radar');
+  if(arr.length<3){box.innerHTML='<div class="mut">Cần chi tiêu ở ít nhất 3 danh mục trong kỳ này để vẽ radar.</div>';return}
+  let list=arr.slice(0,8).map(([c,v])=>({c,v,go:true}));
+  if(arr.length>8){list=arr.slice(0,7).map(([c,v])=>({c,v,go:true}));list.push({c:'Còn lại',v:arr.slice(7).reduce((t,x)=>t+x[1],0),go:false})}
+  const n=list.length,T=list.reduce((t,x)=>t+x.v,0),mx=Math.max(...list.map(x=>x.v));
+  const W=360,H=310,cx=W/2,cy=H/2+2,R=100;
+  const pt=(k,f)=>{const a=-Math.PI/2+2*Math.PI*k/n;return[cx+R*f*Math.cos(a),cy+R*f*Math.sin(a),Math.cos(a),Math.sin(a)]};
+  let g=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Radar chi tiêu theo danh mục">`;
+  [.25,.5,.75,1].forEach(f=>{g+=`<polygon points="${list.map((_,k)=>pt(k,f).slice(0,2).join(',')).join(' ')}" fill="none" stroke="var(--line)" stroke-width="1"/>`});
+  list.forEach((_,k)=>{const q=pt(k,1);g+=`<line x1="${cx}" y1="${cy}" x2="${q[0]}" y2="${q[1]}" stroke="var(--line)" stroke-width="1"/>`});
+  g+=`<polygon points="${list.map((x,k)=>pt(k,x.v/mx).slice(0,2).join(',')).join(' ')}" fill="var(--pri)" fill-opacity=".25" stroke="var(--pri)" stroke-width="2" stroke-linejoin="round"/>`;
+  list.forEach((x,k)=>{
+    const q=pt(k,x.v/mx),l=pt(k,1.0),lx=l[0]+l[2]*14,ly=l[1]+l[3]*14;
+    const an=l[2]>.3?'start':l[2]<-.3?'end':'middle';
+    const nm=x.c.length>13?x.c.slice(0,12)+'…':x.c;
+    const at=x.go?` data-sc="${esc(x.c)}" role="button" tabindex="0" style="cursor:pointer"`:'';
+    g+=`<g${at}><circle cx="${q[0]}" cy="${q[1]}" r="4.5" fill="${catColor(x.c)}" stroke="var(--card)" stroke-width="1.5"/>`
+      +`<text x="${lx}" y="${ly+(l[3]>.5?8:l[3]<-.5?-2:3)}" text-anchor="${an}" style="fill:var(--text);font-size:11px;font-weight:600">${esc(nm)}</text>`
+      +`<text x="${lx}" y="${ly+(l[3]>.5?20:l[3]<-.5?10:15)}" text-anchor="${an}" style="font-size:10px">${Math.round(x.v/T*100)}%</text></g>`;
+  });
+  g+='</svg>';
+  box.innerHTML=g+`<div class="mut" style="text-align:center">Vòng ngoài cùng = ${money(mx)} (danh mục chi nhiều nhất). Bấm tên danh mục để xem chi tiết.</div>`;
 }
 
 function renderSet(){
@@ -965,6 +993,7 @@ function showCatDetail(cat){
   $('#sc').classList.add('on');
 }
 const closeSc=()=>$('#sc').classList.remove('on');
+$('#s-radar').onclick=e=>{const r=e.target.closest('[data-sc]');if(r)showCatDetail(r.dataset.sc)};
 $('#s-cats').onclick=e=>{const r=e.target.closest('[data-sc]');if(r)showCatDetail(r.dataset.sc)};
 $('#s-cats').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){const r=e.target.closest('[data-sc]');if(r){e.preventDefault();showCatDetail(r.dataset.sc)}}};
 $('#sc-x').onclick=closeSc;
